@@ -1,0 +1,266 @@
+---
+title: "Data_Replication"
+author: "Dom-Romanello"
+date: "4/1/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+    fig.path = "img/"
+)
+library(ggplot2)
+```
+
+Title: Deep tree hollows: important refuges from extreme temperatures.
+
+Authors: Chris O’Connell and Gunnar Keppel.
+
+Journal: Wildlife Biology 22:305–310.
+
+Study Background: 
+    A common hypothesis for the evolution of tree hollow inhabitance is the thermoregulation hypothesis, which states that the temperature buffering properties of hollows increase inhabitant fitness. Thus, access to hollows is crucial for many species, especially in regions with high maximum and minimum temperatures. 
+
+Study Goal: 
+    This study seeked to provide further evidence to support or reject the thermoregulatory hypothesis by demonstrating the temperature buffering qualities of four tree hollows in Southern Australia. 
+
+Data Set: 
+    Temperature and humidity data were collected from a local weather station as well as four Australian tree hollows over the course of 28 days and nights. Hollow data were collected at four different depths (10cm, 20cm, 30cm, 40cm). 
+
+Major Analyses: 
+
+  First, ambient temperature ranges were reported for the four hollows and Renmark weather station.
+    
+  Second, weather station ambient temperatures were compared with ibutton hollow external temperatures and were shown to be strongly correlated. Plotted in Appendix 1, figures A1 and A2. 
+
+  Third, ibutton hollow external temperatures were compared across the four hollows using an ANOVA test that found no significant variation for daily maximum or minimum. 
+    
+  Fourth, mean buffering was calculated for the hollows, and hollows were shown to remain cooler than ambient temperatures during the day and warmer than ambient temps at night. 
+    
+  Fifth, a tree was chosen for a plot showing temperature fluctuations over the course of one day outside the hollow and at each of the four different hollow depths. 
+    
+  Sixth, average nightly and daily buffering for each hollow at each of the four depths was plotted.
+    
+  Seventh, maximum daytime buffering at 40cm was plotted for each tree hollow in relation to ambient maximum temperatures, showing that as maximum ambient temperature increased so did maximum buffering. 
+    
+  Note: humidity was not a primary focus of the article but was included in a table.
+    
+Re-Analyses:
+
+   First, ambient temperature ranges were reported for the four hollows and Renmark weather station.
+    
+   Second, two ANOVA tests were conducted to compare ibutton hollow external temperatures across the four hollows.
+    
+   Third, figure 3 was plotted. 
+    
+   Fourth, figures A1 and A2 from the appendix were plotted. Pearson's correlation coefficients were calculated. 
+    
+  Not all of the analyses were re-done in this assignment. Supplementary material was entirely insufficient for re-creating figures 2 and 4. This article is a poor example of reproducable research. 
+    
+The data file:
+
+Data was entered from the supplementary information pdf into excel, altered to fit a format suitable for re-analysis, and put into csv format. 
+  
+```{r}
+
+Temp <- read.csv("~/Desktop/R-Data-Analysis/Data_Replication.csv")
+
+head(Temp)
+
+```
+
+Temperature Ranges:
+
+Across the 28 day study, temperatures recorded by iButtons outside the hollows recorded a minimum temperature of 0.5 degrees celcius and maximum temperature of 40.1 degrees celcius. Ambient temperature at the Renmark Weather Station ranged from 0.1-39.7 degrees celcius. The summary function is an efficient way to acquire results identical to those presented in the paper. 
+
+```{r}
+
+summary(Temp$Min_Temp)
+summary(Temp$Max_Temp)
+summary(Temp$MinRenmark)
+summary(Temp$MaxRenmark)
+
+```
+
+ANOVA Tests:
+
+No significant variation was found among the four tree hollows for daily maximum or minimum ambient temperature values.
+
+Daily Max (F = 0.15, p = 0.93)
+
+Daily Min (F = 0.70, p = 0.55)
+
+Thus, external iButtons can be a trusted source of ambient temperature data.  
+
+To calculate these values the supplementary data were rearranged so that the Max_Temp column showed the maximum temperature and the Hollow_ID column identified the hollow associated with the particular temperature value. I then used the analysis of variance function to calculate F and p values for daily minimum and maximum temperature relative to hollow ID. Results are identical to the paper as shown above. 
+
+```{r}
+
+aovmax <- aov(data = Temp, Max_Temp ~ Hollow_ID)
+summary(aovmax)
+
+aovmin <- aov(data = Temp, Min_Temp ~ Hollow_ID)
+summary(aovmin)
+
+```
+
+Figure 3: 
+
+Average buffering provided by tree hollows at different depths during night and day for 28 days (3–31 October 2013).
+
+First, a data frame was created so that each tree hollow had one column for average night buffering and average day buffering. The data frame has 5 rows, row zero and a row for each of the four different hollow depths. 
+
+Second, the ggplot package was used (geom_point) to plot each of the points in the dataframe. Colors and shapes were matched to figure 3.
+
+Third, ggplot was used to connect the dots from each column of the dataframe (geom_line). Again, color and linetype was set to match figure 3. Note: to avoid error, group = 1 must be entered. 
+
+Fourth, the x and y axes were labeled to match figure 3. 
+
+Figure 3 from the paper:
+
+<img src="img/Figure_3.jpg" width="800px"/>
+
+Figure 3 re-created:
+
+```{r}
+
+DF <- data.frame(Depth=rep(c("0","10", "20","30","40")),
+           Day66=c(0,-1.7,-1.4,-2.9,-3), 
+            Night66=c(0,0.8,0.4,1.4,2), 
+              Day82A=c(0,-3.7,-3.9,-4.1,-4.4),
+                Night82A=c(0,3.3,2.9,3.1,3.1),
+                  Day82B=c(0,-3.4,-3.7,-4,-4.3), 
+                    Night82B=c(0,3,2.9,2.9,2.8), 
+                      Day87=c(0,-2.4,-2.7,-3.3,-3.1),
+                        Night87=c(0,1,2,1.9,1.9))
+head(DF)
+
+
+
+A = ggplot() + 
+  geom_point(data = DF, aes(x = Depth, y = Day66), color = "dark gray", shape = 18) +
+  geom_point(data = DF, aes(x = Depth, y = Night66), color = "dark gray", shape = 18) +
+  geom_point(data = DF, aes(x = Depth, y = Day82A), color = "black", shape = 15) +
+  geom_point(data = DF, aes(x = Depth, y = Night82A), color = "black", shape = 15) +
+  geom_point(data = DF, aes(x = Depth, y = Day82B), color = "black", shape = 17) +
+  geom_point(data = DF, aes(x = Depth, y = Night82B), color = "black", shape = 17) +
+  geom_point(data = DF, aes(x = Depth, y = Day87), color = "black") +
+  geom_point(data = DF, aes(x = Depth, y = Night87), color = "black") +
+  geom_line(data = DF, aes(x = Depth, y = Day66), group=1, color = "dark gray") +
+  geom_line(data = DF, aes(x = Depth, y = Night66), group=1, color = "dark gray") +
+  geom_line(data = DF, aes(x = Depth, y = Day82A), group=1, color = "black") +
+  geom_line(data = DF, aes(x = Depth, y = Night82A), group=1, color = "black") +
+  geom_line(data = DF, aes(x = Depth, y = Day82B), group=1, color = "black", linetype = "dotted") +
+  geom_line(data = DF, aes(x = Depth, y = Night82B), group=1, color = "black", linetype = "dotted") +
+  geom_line(data = DF, aes(x = Depth, y = Day87), group=1, color = "black", linetype = "dashed") +
+  geom_line(data = DF, aes(x = Depth, y = Night87), group=1, color = "black", linetype = "dashed") +
+  xlab('Hollow Depth (cm)') +
+  ylab('Average Buffering (C)') 
+
+print(A)
+
+```
+
+Figure A1:
+
+A plot showing the correlation between maximum ambient temperature at the Renmark weather station and each of the four hollows. 
+
+(Pearson’s correlations coefficients: tree 66: r2 = 0.86, p = 6.4 × 10-9; tree 82A: r2 = 0.92, p = 1.9 × 10-11; tree 82B: r2 = 0.92, p = 1.7 × 10-11; tree 87: r2 = 0.94, p = 2.4 × 10-13).
+
+First, the ggplot package was used to plot the maximum daily temperatures of each of the external iButtons in relation to the maximum ambient temperature of Renmark weather station (geom_point). The color of each point was matched to figure A1.  
+
+Second, geom_smooth was used (method='lm') to create fitted lines for the points plotted previously. Again, color and linetype was matched to figure A1.
+
+Blue- Hollow 66
+Orange- Hollow 82A
+Gray- Hollow 82B
+Yellow- Hollow 87
+
+Third, axis labels and ticks were adjusted to match figure A1.
+
+Fourth, pearsons correlation tests were run to compare the relationship between maximum ambient temperature at the Renmark weather station to the iButton at each of the four hollows. This was done using the cor.test function set to "pearson" with a confidence level of .95 and results are identical to the paper as shown above. 
+
+Figure A1 from the paper:
+
+<img src="img/Figure_A1.jpg" width="800px"/>
+
+Figure A1 re-created:
+
+```{r}
+
+A1 = ggplot() + 
+  geom_point(data = Temp, aes(x = Temp$Max_Renmark, y = Temp$Max66), color = "blue", shape = 16, size = 2.5) + 
+  geom_point(data = Temp, aes(x = Temp$Max_Renmark, y = Temp$Max82A), color = "orange", shape = 16, size = 2.5) +
+  geom_point(data = Temp, aes(x = Temp$Max_Renmark, y = Temp$Max82B), color = "gray", shape = 16, size = 2.5) + 
+  geom_point(data = Temp, aes(x = Temp$Max_Renmark, y = Temp$Max87), color = "yellow", shape = 16, size = 2.5) + 
+  geom_smooth(method = 'lm', data= Temp, aes(x = Temp$Max_Renmark, y = Temp$Max66), color = "blue", linetype = "dotted", se = FALSE) +
+  geom_smooth(method = 'lm', data= Temp, aes(x = Temp$Max_Renmark, y = Temp$Max82A), color = "orange", linetype = "dotted", se = FALSE) +
+  geom_smooth(method = 'lm', data= Temp, aes(x = Temp$Max_Renmark, y = Temp$Max82B), color = "gray", linetype = "dotted", se = FALSE) +
+  geom_smooth(method = 'lm', data= Temp, aes(x = Temp$Max_Renmark, y = Temp$Max87), color = "yellow", linetype = "dotted", se = FALSE) +
+  xlab('Renmark Temperature (C)') +
+  ylab('Recorded Ambient Temperature (C)') + 
+  expand_limits(x=c(15:45)) +
+  expand_limits(y=c(15:45)) 
+
+
+print(A1)
+
+cor.test(Temp$Max_Renmark, Temp$Max66, method = "pearson", conf.level = 0.95)
+cor.test(Temp$Max_Renmark, Temp$Max82A, method = "pearson", conf.level = 0.95)
+cor.test(Temp$Max_Renmark, Temp$Max82B, method = "pearson", conf.level = 0.95)
+cor.test(Temp$Max_Renmark, Temp$Max87, method = "pearson", conf.level = 0.95)
+
+```
+
+Figure A2:
+
+A plot showing the correlation between minimum ambient temperature at the Renmark weather station and each of the four hollows. 
+
+(Pearson’s correlations coefficients: tree 66: r2 = 0.88, p = 1.8 × 10-9; tree 82A: r2 = 0.89, p = 3.0 × 10-10; tree 82B: r2 = 0.90, p = 1.1 × 10-10; tree 87: r2 = 0.90, p = 1.8 × 10-10).
+
+First, the ggplot package was used to plot the minimum daily temperatures of each of the external iButtons in relation to the minimum ambient temperature of Renmark weather station (geom_point). The color of each point was matched to figure A2.  
+
+Second, geom_smooth was used (method='lm') to create fitted lines for the point plotted previously. Again, color and linetype was matched to figure A2.
+
+Blue- Hollow 66
+Orange- Hollow 82A
+Gray- Hollow 82B
+Yellow- Hollow 87
+
+Third, axis labels and ticks were adjusted to match figure A2.
+
+Fourth, pearsons correlation tests were run to compare the relationship between minimum ambient temperature at the Renmark weather station to the iButton at each of the four hollows. This was done using the cor.test function set to "pearson" with a confidence level of .95 and results are identical to the paper as shown above. 
+
+Figure A2 from the paper:
+
+<img src="img/Figure_A2.jpg" width="800px"/>
+
+Figure A2 re-created:
+
+```{r}
+
+A2 = ggplot() + 
+  geom_point(data = Temp, aes(x = Temp$MinR, y = Temp$M66), group = 1, color = "blue", shape = 16, size = 2.5) +
+  geom_point(data = Temp, aes(x = Temp$MinR, y = Temp$M82A), group = 1, color = "orange", shape = 16, size = 2.5) +
+  geom_point(data = Temp, aes(x = Temp$MinR, y = Temp$M82B), group = 1, color = "gray", shape = 16, size = 2.5) + 
+  geom_point(data = Temp, aes(x = Temp$MinR, y = Temp$M87), group = 1, color = "yellow", shape = 16, size = 2.5) + 
+  geom_smooth(method = 'lm', data= Temp, aes(x = Temp$MinR, y = Temp$M66), color = "blue", linetype = "dotted", se = FALSE) +
+  geom_smooth(method = 'lm', data= Temp, aes(x = Temp$MinR, y = Temp$M82A), color = "orange", linetype = "dotted", se = FALSE) +
+  geom_smooth(method = 'lm', data= Temp, aes(x = Temp$MinR, y = Temp$M82B), color = "gray", linetype = "dotted", se = FALSE) +
+  geom_smooth(method = 'lm', data= Temp, aes(x = Temp$MinR, y = Temp$M87), color = "yellow", linetype = "dotted", se = FALSE) +
+  xlab('Renmark Temperature (C)') +
+  ylab('Recorded Ambient Temperature (C)') + 
+  expand_limits(x=c(0:20)) +
+  expand_limits(y=c(0:20))
+
+print(A2)
+
+cor.test(Temp$MinR, Temp$M66, method = "pearson", conf.level = 0.95)
+cor.test(Temp$MinR, Temp$M82A, method = "pearson", conf.level = 0.95)
+cor.test(Temp$MinR, Temp$M82B, method = "pearson", conf.level = 0.95)
+cor.test(Temp$MinR, Temp$M87, method = "pearson", conf.level = 0.95)
+
+
+```
+
